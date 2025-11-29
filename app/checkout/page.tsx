@@ -7,8 +7,8 @@ import PaymentForm from "./components/PaymentForm";
 import ItemDeliveryDetail from "./components/ItemDeliveryDetail";
 import Image from "next/image";
 import { Summary, ShippingData, PaymentData } from "@/app/types";
+import OrderSummaryCard from "./components/OrderSummaryCard";
 
-// Initial data constants are now typed
 const initialShippingData: ShippingData = {
   name: "John Doe",
   address: "123 Main St, OogaBooga, TX 77777",
@@ -27,8 +27,7 @@ const initialSummary: Summary = {
 };
 
 const CheckoutPage = () => {
-  // State variables are now explicitly typed
-  const [openPanel, setOpenPanel] = useState<number>(3);
+  const [openPanels, setOpenPanels] = useState<number[]>([3]);
   const [isEditing, setIsEditing] = useState<number>(0);
   const [shippingData, setShippingData] =
     useState<ShippingData>(initialShippingData);
@@ -36,12 +35,23 @@ const CheckoutPage = () => {
     useState<PaymentData>(initialPaymentData);
   const [summary, setSummary] = useState<Summary>(initialSummary);
 
+  /**
+   * Toggles the open state of a specific panel.
+   * If the panel is open, it closes it; if closed, it opens it.
+   */
   const togglePanel = (panelNumber: number) => {
     setIsEditing(0);
-    setOpenPanel(openPanel === panelNumber ? 0 : panelNumber);
+    setOpenPanels((prevOpenPanels) => {
+      if (prevOpenPanels.includes(panelNumber)) {
+        // Panel is currently open, so close it (remove from array)
+        return prevOpenPanels.filter((p) => p !== panelNumber);
+      } else {
+        // Panel is currently closed, so open it (add to array)
+        return [...prevOpenPanels, panelNumber];
+      }
+    });
   };
 
-  // Callback argument is explicitly typed
   const stableSetSummary = useCallback((newSummary: Summary) => {
     setSummary(newSummary);
   }, []);
@@ -70,7 +80,7 @@ const CheckoutPage = () => {
             step={1}
             title="Shipping Address"
             summaryContent={shippingData.address}
-            isOpen={openPanel === 1}
+            isOpen={openPanels.includes(1)}
             onClick={() => togglePanel(1)}
           >
             {isEditing === 1 ? (
@@ -104,7 +114,7 @@ const CheckoutPage = () => {
             step={2}
             title="Payment Information"
             summaryContent={`${paymentData.cardType} ending in ${paymentData.lastFour}`}
-            isOpen={openPanel === 2}
+            isOpen={openPanels.includes(2)}
             onClick={() => togglePanel(2)}
           >
             {isEditing === 2 ? (
@@ -142,7 +152,7 @@ const CheckoutPage = () => {
             title="Items and Delivery"
             // Display the item count from summary state
             summaryContent={`Items ($${summary.itemsTotal.toFixed(2)})`}
-            isOpen={openPanel === 3}
+            isOpen={openPanels.includes(3)}
             onClick={() => togglePanel(3)}
           >
             {/* setSummary prop type must be defined in ItemDeliveryDetailProps as (newSummary: Summary) => void */}
@@ -151,45 +161,7 @@ const CheckoutPage = () => {
         </div>
 
         {/* 2. Right Panel: Order Summary */}
-        <div className="w-1/3 bg-gray-700 p-8 rounded-lg self-start sticky top-6">
-          <h3 className="text-xl font-bold mb-6">Order Summary</h3>
-
-          <div className="space-y-3 pb-4 border-b border-gray-600">
-            <div className="flex justify-between">
-              <span>Items Subtotal:</span>
-              <span className="text-green-400">
-                ${summary.itemsTotal.toFixed(2)}
-              </span>
-            </div>
-            <div className="flex justify-between text-red-400">
-              <span>Coupons Discount:</span>
-              <span>-${summary.totalDiscount.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Shipping & handling:</span>
-              <span className="text-green-400">
-                ${summary.shippingTotal.toFixed(2)}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span>Tax:</span>
-              <span className="text-green-400">${summary.tax.toFixed(2)}</span>
-            </div>
-          </div>
-
-          <div className="flex justify-between items-center pt-4">
-            <span className="text-lg font-bold text-green-400">
-              Order Total
-            </span>
-            <span className="text-lg font-bold">
-              ${summary.orderTotal.toFixed(2)}
-            </span>
-          </div>
-
-          <button className="w-full mt-6 py-3 bg-green-500 hover:bg-green-600 text-black font-bold rounded-lg transition-colors cursor-pointer">
-            Confirm Purchase
-          </button>
-        </div>
+        <OrderSummaryCard summary={summary} />
       </main>
     </div>
   );

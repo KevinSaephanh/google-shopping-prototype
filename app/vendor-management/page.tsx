@@ -6,7 +6,6 @@ import { VENDOR_REWARDS, VENDORS } from "../constants";
 import { CouponReward, VendorKey } from "@/app/types";
 
 const VendorManagementPage = () => {
-  // State variables are now explicitly typed using primitives and imported types
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [syncedVendors, setSyncedVendors] = useState<VendorKey[]>([
     "Amazon",
@@ -17,7 +16,6 @@ const VendorManagementPage = () => {
   const [selectedVendor, setSelectedVendor] = useState<VendorKey>("Amazon");
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
-  // Explicitly typed as an array of CouponReward objects
   const currentRewards: CouponReward[] = VENDOR_REWARDS[selectedVendor] || [];
 
   // filteredVendors implicitly remains VendorKey[]

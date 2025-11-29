@@ -60,7 +60,6 @@ const calculatePrices = (data: VendorSection[]): PriceCalculationResult => {
   let totalDiscount: number = 0;
 
   data.forEach((vendorSection) => {
-    // Safe indexing now that vendorSection.vendor is typed as VendorKey
     const rewards: CouponReward[] = VENDOR_REWARDS[vendorSection.vendor] || [];
     let totalItemsPrice: number = 0;
     let finalShipping: number = vendorSection.baseShipping;
@@ -81,7 +80,6 @@ const calculatePrices = (data: VendorSection[]): PriceCalculationResult => {
     );
 
     finalVendorSubtotal = totalItemsPrice;
-    // Use the strongly typed AppliedDiscount[]
     const appliedVendorDiscounts: AppliedDiscount[] = [];
 
     // 2. Apply item discounts to the entire vendor subtotal
@@ -132,7 +130,6 @@ const calculatePrices = (data: VendorSection[]): PriceCalculationResult => {
     grandSubtotal += finalVendorSubtotal;
     grandShipping += finalShipping;
 
-    // Push the fully typed CalculatedVendorSection object
     calculatedData.push({
       ...vendorSection,
       items: calculatedItems,
@@ -167,7 +164,6 @@ interface ItemDeliveryDetailProps {
   setSummary: (summary: Summary) => void;
 }
 
-// --- Component (Typed) ---
 const ItemDeliveryDetail: React.FC<ItemDeliveryDetailProps> = ({
   setSummary,
 }) => {
@@ -303,14 +299,14 @@ const ItemDeliveryDetail: React.FC<ItemDeliveryDetailProps> = ({
 
               {/* Price Details - Only show base price */}
               <div className="text-right">
-                <p className="text-lg">${item.basePrice.toFixed(2)}</p>
+                <p className="text-lg text-red-400">${item.basePrice.toFixed(2)}</p>
               </div>
             </div>
           ))}
 
           {/* Discount Summary for Vendor */}
           {vendorSection.vendorDiscount > 0 && (
-            <div className="flex justify-between text-sm mt-2 text-red-400">
+            <div className="flex justify-between text-sm mt-2 text-green-400">
               <span>Vendor Item Discount:</span>
               <span>-${vendorSection.vendorDiscount.toFixed(2)}</span>
             </div>
@@ -320,11 +316,7 @@ const ItemDeliveryDetail: React.FC<ItemDeliveryDetailProps> = ({
           <div className="flex justify-between text-base font-semibold mt-2 pt-2 border-t border-gray-700/50">
             <span>Items Subtotal for {vendorSection.vendor}:</span>
             <span
-              className={
-                vendorSection.vendorDiscount > 0
-                  ? "text-green-400"
-                  : "text-white"
-              }
+              className="text-red-400" 
             >
               ${vendorSection.finalVendorSubtotal.toFixed(2)}
             </span>
@@ -335,15 +327,18 @@ const ItemDeliveryDetail: React.FC<ItemDeliveryDetailProps> = ({
             Shipping & handling:
             {vendorSection.shippingDiscount > 0 ? (
               <>
+                {/* Cost (strikethrough) */}
                 <span className="line-through text-red-400 ml-1">
                   ${vendorSection.shippingBefore.toFixed(2)}
                 </span>
+                {/* Savings (final price) */}
                 <span className="text-green-400 ml-1">
                   ${vendorSection.shippingAfter.toFixed(2)}
                 </span>
               </>
             ) : (
-              <span className="ml-1">
+              // Cost (if no discount)
+              <span className="ml-1 text-red-400">
                 ${vendorSection.shippingAfter.toFixed(2)}
               </span>
             )}
